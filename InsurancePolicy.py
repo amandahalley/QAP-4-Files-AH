@@ -1,6 +1,6 @@
 # Description: A program to enter and calculate new insurance policy information for the One Stop Insurance Company customers.
 # Author: Amanda Halley
-# Date(s): March 18, 2024 - 
+# Date(s): March 18 - March 23, 2024
 
 # Import libraries
 import datetime
@@ -8,6 +8,7 @@ import FormatValues as FV
 import time 
 import sys
 import Functions as FN
+import os.path
 
 # Define progarm constants.
 f = open("defaults.dat", "r")
@@ -35,6 +36,23 @@ Paylst = ["Full", "Monthly"]
 
 # Main program.
 while True:
+
+    CurrentPolicyNum = 0
+    exists = os.path.isfile("Claims.txt")
+    if exists:
+        with open('Claims.txt') as f:
+            for line in f:
+                pass
+            last_line = line
+            last_line = last_line.split(",")
+            PreviousPolicyNum = last_line[0]
+            CurrentPolicyNum = int(PreviousPolicyNum) + 1
+            
+            
+    else:
+        CurrentPolicyNum = POLICY_NUM            
+
+
 
      # Gather user input.
     while True:
@@ -152,16 +170,18 @@ while True:
                 print("Data entry error - Invalid payment method.")
             else:
                 break
-    
-        DownPay = input("Do you want to make a down payment? (Y/N): ").upper()
-        if DownPay == "Y":
+        if PayMethod != "FUll":
             while True:
-                DownPayAmt = input("Enter the down payment amount: ")
-                if DownPayAmt == "":
-                    print("Data entry error - Down payment amount can not be blank.")    
-                else:
-                    DownPayAmt = float(DownPayAmt)
-                    break
+                DownPay = input("Do you want to make a down payment? (Y/N): ").upper()
+                if DownPay == "Y":
+                    while True:
+                        DownPayAmt = input("Enter the down payment amount: ")
+                        if DownPayAmt == "":
+                            print("Data entry error - Down payment amount can not be blank.")    
+                        else:
+                            DownPayAmt = float(DownPayAmt)
+                            break
+                break
         break
 
         
@@ -177,8 +197,8 @@ while True:
     HST = FN.CalculateHST(TotalInsPremium, HST_RATE)    
 
     TotalCost = HST + TotalInsPremium
-
-    MonthlyPay = FN.CalcMonthPay(PayMethod, TotalCost, PROCESSING_FEE, DownPayAmt)   
+    if PayMethod == "Monthly":
+        MonthlyPay = FN.CalcMonthPay(PayMethod, TotalCost, PROCESSING_FEE, DownPayAmt)   
 
     InvDate = FN.GetInvDate()
 
@@ -205,7 +225,12 @@ while True:
         DownPay = "No"
 
     Claims = FN.GetClaims()
-    FN.SaveClaims(Claims, "Claims.txt",POLICY_NUM, CustfirstName, CustLastName, PhoneNum, Address, City, Prov, PostalCode, NumCarsIns, ExtLiability, GlassCvrg, LoanerCar, PayMethod, DownPay, TotalInsPremium)
+
+
+
+
+
+    FN.SaveClaims(Claims, "Claims.txt",CurrentPolicyNum, CustfirstName, CustLastName, PhoneNum, Address, City, Prov, PostalCode, NumCarsIns, ExtLiability, GlassCvrg, LoanerCar, PayMethod, DownPay, TotalInsPremium)
 
     
 
@@ -216,7 +241,7 @@ while True:
     print("-----------------------------------------------------------")
     print()
     CurDateDsp = FV.FDateS(CurDate)
-    print(f"Policy Number: {POLICY_NUM}                        Date: {CurDateDsp:>10s}")
+    print(f"Policy Number: {CurrentPolicyNum}                        Date: {CurDateDsp:>10s}")
     print(f"Customer Name: {CustfirstName} {CustLastName}          First Pay: {FV.FDateS(FirstPayDate):>10s}")
     print()
     print(f"Address: ")
@@ -242,13 +267,15 @@ while True:
     print(f"          Payment Method:                {PayMethod}")
     if DownPay != "N":
         print(f"          Down Payment Amount:         {FV.FDollar2(DownPayAmt):>9s}")
+        print()
     print(f"          Add-on Costs:                {FV.FDollar2(ExtraCosts):>9s}")
     print(f"          Insurance Premium rate:      {FV.FDollar2(TotalInsPremium):>9s}")
     print(f"          HST:                         {FV.FDollar2(HST):>9s}")
     print(f"          -----------------------      ---------")
     print(f"          Total Cost:                  {FV.FDollar2(TotalCost):>9s}")
     print()
-    print(f"          Monthly Payment:             {FV.FDollar2(MonthlyPay):>9s}")
+    if PayMethod == "Monthly":
+        print(f"          Monthly Payment:             {FV.FDollar2(MonthlyPay):>9s}")
     print()
     print("-----------------------------------------------------------")
     print()
@@ -280,7 +307,6 @@ while True:
     print()
     time.sleep(1.5)  
     sys.stdout.write('\033[2K\r') 
-    POLICY_NUM += 1
 
     # clear the file
     AddCustomer = input("Would you like to add another customer? (Y/N): ").upper()

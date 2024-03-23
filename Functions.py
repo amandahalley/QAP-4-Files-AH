@@ -21,12 +21,12 @@ def CalculateHST(TotalInsPremium, HstRate):
     HST = HstRate * TotalInsPremium
     return HST
 
-def CalcMonthPay(PayMethod, TotalCost, ProcessingFee, DownPay):  #=0
-    if PayMethod == "Monthly":
-        TotalCost += ProcessingFee / 8
-        MonthlyPay = TotalCost / 8
-    elif PayMethod == "DownPay":
+def CalcMonthPay(PayMethod, TotalCost, ProcessingFee, DownPay): 
+    if DownPay != 0:
         TotalCost -= DownPay
+        TotalCost += ProcessingFee 
+        MonthlyPay = TotalCost / 8
+    else:
         TotalCost += ProcessingFee
         MonthlyPay = TotalCost / 8
     return MonthlyPay
@@ -83,7 +83,7 @@ def GetClaims():
     return Claims
 
 def SaveClaims(Claims, ClaimFile, PolicyNum, FirstName, LastName, PhoneNum, CustAdd, City, Prov, PostalCode, NumCars, ExtLiability, GlassCov, Loaner, PayMethod, DownPay, TotInsPrem):
-    with open(ClaimFile, 'w') as file:
+    with open(ClaimFile, 'a') as file:
         for Claim in Claims:
             
 
@@ -95,7 +95,7 @@ def SaveClaims(Claims, ClaimFile, PolicyNum, FirstName, LastName, PhoneNum, Cust
 
             Extras = str(NumCars) + ", " + str(ExtLiability) + ", " + str(GlassCov) + ", " + (Loaner) + ", "
 
-            Pay = (PayMethod) + ", " + (DownPay) + ", " + str(TotInsPrem)
+            Pay = (PayMethod) + ", " + (DownPay) + ", " + str(TotInsPrem) + "\n"
 
             
             file.write(CustInfo)
